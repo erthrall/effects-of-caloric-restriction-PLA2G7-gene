@@ -1,0 +1,74 @@
+# rvtest
+# use CMC: collapse and combines rare variants, suitable for binary and quantitative traits 
+
+
+# template for binary traits 
+rvtest --inVcf PLA2G7sorted.vcf.gz --pheno binary_pheno.tsv --pheno-name vessel --covar rv.covar.tsv --covar-name sex,age,PC1,PC2,PC3,PC4,PC5 --out vessel.cmc.out --setFile setlist.txt --set set1 --burden cmc 
+
+
+# for loop using name of phenotype 
+cont_phenos=$(head -n1 continuous_pheno.tsv | tr ' ' '\n' | tail -n +6)
+
+for pheno in $cont_phenos; do
+  echo "Running rvtest for phenotype: $pheno"
+  rvtest \
+    --inVcf PLA2G7sorted.vcf.gz \
+    --pheno continuous_pheno.tsv \
+    --pheno-name "${pheno}" \
+    --out "rvtest_out_${pheno}" \
+	--covar rv.covar.tsv \
+	--covar-name sex,age,PC1,PC2,PC3,PC4,PC5 \
+	--setFile setlist.txt \
+	--set set1 \
+	--burden cmc 
+
+done
+
+
+# loop for updated nrankT 
+rankT_phenos=($(head -n1 rankT_pheno.tsv | awk '{for(i=6;i<=NF;i++) printf "%s ", $i; print ""}'))
+
+for pheno in ${rankT_phenos[@]}; do
+  echo "Running rvtest for phenotype: $pheno"
+  rvtest \
+    --inVcf PLA2G7sorted.vcf.gz \
+    --pheno rankT_pheno.tsv \
+    --pheno-name "${pheno}" \
+    --out "rvtest_out_${pheno}" \
+	--covar rv.covar.tsv \
+	--covar-name sex,age,PC1,PC2,PC3,PC4,PC5 \
+	--setFile setlist.txt \
+	--set set1 \
+	--burden cmc
+
+done
+
+
+# for loop using name of phenotype 
+bin_phenos=($(head -n1 binary_pheno.tsv | awk '{for(i=6;i<=NF;i++) printf "%s ", $i; print ""}'))
+
+for pheno in $bin_phenos; do
+  echo "Running rvtest for phenotype: $pheno"
+  rvtest \
+    --inVcf PLA2G7sorted.vcf.gz \
+    --pheno binary_pheno.tsv \
+    --pheno-name "${pheno}" \
+    --out "rvtest_out_${pheno}" \
+	--covar rv.covar.tsv \
+	--covar-name sex,age,PC1,PC2,PC3,PC4,PC5 \
+	--setFile setlist.txt \
+	--set set1 \
+	--burden cmc 
+
+done
+
+# collate results from .assoc files 
+# Nu0mVar: number of variants in the gene(or site)
+# NumPolyVar: number of Polymorphic Genotypes
+# NonRefSite: non-reference site, genotype is not exactly 0.0
+
+
+
+bash collate_rvtest.sh
+
+  
